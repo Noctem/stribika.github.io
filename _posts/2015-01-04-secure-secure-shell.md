@@ -211,7 +211,7 @@ Create the ssh-user group with `sudo groupadd ssh-user`, then add each ssh user 
 
 Symmetric ciphers are used to encrypt the data after the initial key exchange and authentication is complete.
 
-Here we have quite a few algorithms (10-14 were removed in [OpenSSH 7.6][76release]):
+Here we have quite a few algorithms:
 
 1. 3des-cbc
 1. aes128-cbc
@@ -222,24 +222,18 @@ Here we have quite a few algorithms (10-14 were removed in [OpenSSH 7.6][76relea
 1. aes256-ctr
 1. aes128-gcm@openssh.com
 1. aes256-gcm@openssh.com
-1. arcfour
-1. arcfour128
-1. arcfour256
-1. blowfish-cbc
-1. cast128-cbc
 1. chacha20-poly1305@openssh.com
 
 We have to consider the following:
 
 * *Security of the cipher algorithm*:
-  This eliminates 1 and 10-12 - both DES and RC4 are broken.
-  Again, no need to wait for them to become even weaker, disable them now.
+  This eliminates 1, DES is broken.
+  Again, no need to wait for it to become even weaker, disable it now.
 * *Key size*:
   At least 128 bits, the more the better.
 * *Block size*:
   Does not apply to stream ciphers.
   At least 128 bits.
-  This eliminates 13 and 14 because those have a 64 bit block size.
 * *Cipher mode*:
   The recommended approach here is to prefer [AE][ae] modes and optionally allow CTR for compatibility.
   CTR with Encrypt-then-MAC is provably secure.
@@ -461,7 +455,6 @@ I promise not to use `git push -f`.
 [dh-draft]: https://tools.ietf.org/html/draft-ietf-curdle-ssh-modp-dh-sha2-09
 [73release]: https://www.openssh.com/releasenotes.html#7.3
 [draft-recommend]: https://tools.ietf.org/html/draft-ietf-curdle-ssh-kex-sha2-09#section-3.9
-[76release]: https://www.openssh.com/releasenotes.html#7.6
 [rfc4419]: https://www.ietf.org/rfc/rfc4419.txt
 [ed25519]: http://ed25519.cr.yp.to/
 [google-auth]: https://github.com/google/google-authenticator/wiki/PAM-Module-Instructions
