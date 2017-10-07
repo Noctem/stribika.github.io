@@ -12,8 +12,8 @@ My goal with this post here is to make NSA analysts sad.
 
 TL;DR: Scan this post for fixed width fonts, these will be the config file snippets and commands you have to use.
 
-*Warning*: You will need a recent OpenSSH version.
-It should work with 6.5 but I have only tested 6.7 and connections to Github.
+*Warning*: You will need a recent OpenSSH version, preferably the latest.
+It should work with 6.5 except where noted.
 Here is a good [compatibility matrix][compat].
 
 # The crypto
@@ -83,25 +83,23 @@ We have to look at 3 things here:
 * *Bit size of the DH modulus*:
   This eliminates 2 because the NSA has supercomputers and possibly unknown attacks.
   1024 bits simply don't offer sufficient security margin.
+  It is also preferable to [avoid 8][group-exchange] because its size can be negotiated by the client,
+  but it can be included if needed for compatibility.
 * *Security of the hash function*:
   This eliminates 2, 3, and 7 because SHA1 is broken.
   We don't have to wait for a second preimage attack that takes 10 minutes on a cellphone to disable it right now.
 
-We are left with 1 and 8, as well as 4-6 which were added in [OpenSSH 7.3][73release].
-1 is better and it's perfectly OK to only support that but for interoperability (with Eclipse, WinSCP), 8 can be included.
+We are left with 1 and 4-6. Note that 4-6 require [OpenSSH 7.3][73release] or later.
+5 and 6 are [likely overkill][draft-recommend] currently, but you can adjust the order to fit your threat model.
 
 Recommended `/etc/ssh/sshd_config` snippet:
 
-<pre><code id="server-kex">KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256</code></pre>
+<pre><code id="server-kex">KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512</code></pre>
 
 Recommended `/etc/ssh/ssh_config` snippet:
 
-<pre><code id="client-kex"># Github needs diffie-hellman-group-exchange-sha1 some of the time but not always.
-#Host github.com
-#    KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1
-    
-Host *
-    KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256</code></pre>
+<pre><code id="client-kex">Host *
+    KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512</code></pre>
 
 If you chose to enable 8, open `/etc/ssh/moduli` if exists, and delete lines where the 5th column is less than 2000.
 
@@ -462,6 +460,7 @@ I promise not to use `git push -f`.
 [rfc4253]: https://www.ietf.org/rfc/rfc4253.txt
 [dh-draft]: https://tools.ietf.org/html/draft-ietf-curdle-ssh-modp-dh-sha2-09
 [73release]: https://www.openssh.com/releasenotes.html#7.3
+[draft-recommend]: https://tools.ietf.org/html/draft-ietf-curdle-ssh-kex-sha2-09#section-3.9
 [76release]: https://www.openssh.com/releasenotes.html#7.6
 [rfc4419]: https://www.ietf.org/rfc/rfc4419.txt
 [ed25519]: http://ed25519.cr.yp.to/
@@ -471,6 +470,7 @@ I promise not to use `git push -f`.
 [pam]: https://en.wikipedia.org/wiki/Pluggable_authentication_module
 [nist-sucks]: http://blog.cr.yp.to/20140323-ecdsa.html
 [bullrun]: https://projectbullrun.org/dual-ec/vulnerability.html
+[group-exchange]: http://r6.ca/blog/20150111T040537Z.html
 [ecdsa-same-k]: https://security.stackexchange.com/a/46781
 [ecdsa-sony]: https://events.ccc.de/congress/2010/Fahrplan/attachments/1780%5F27c3%5Fconsole%5Fhacking%5F2010.pdf
 [ae]: https://en.wikipedia.org/wiki/Authenticated_encryption
